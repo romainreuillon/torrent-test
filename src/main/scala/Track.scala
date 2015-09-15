@@ -27,12 +27,14 @@ import collection.JavaConversions._
 
 object Track extends App {
 
+  val sharedFile = new File(args(0))
+  val dir = sharedFile.getParentFile
+
   val torrentFile = new File("/tmp/test.torrent")
 
   val tracker = new Tracker(new InetSocketAddress(InetAddress.getLoopbackAddress, 6969))
 
-  val dir = new File("/home/reuillon/bin")
-  val torrent = Torrent.create(new File(dir, "care"), tracker.getAnnounceUrl().toURI, "romain")
+  val torrent = Torrent.create(sharedFile, tracker.getAnnounceUrl().toURI, "romain")
 
   val fos = new FileOutputStream(torrentFile)
   try torrent.save(fos)
@@ -48,15 +50,7 @@ object Track extends App {
     new SharedTorrent(torrent, dir, true)
   )
 
-  val stop = client.getClass.getDeclaredField("stop")
-  stop.setAccessible(true)
-  stop.set(client, false)
-
-  val seed = client.getClass.getDeclaredField("seed")
-  seed.setAccessible(true)
-  seed.set(client, true)
-
-  client.run()
+  client.share()
 
 }
 
